@@ -34,6 +34,13 @@ func main() {
 		log.Fatal("Must set Discord token as env variable: BOT_TOKEN")
 	}
 
+	guildId, ok := getEnv("DISCORD_GUILD_ID")
+
+	if !ok {
+		log.Fatal("Must set Guild ID as env variable: DISCORD_GUILD_ID")
+	}
+
 	bot.BotToken = botToken
+	bot.GUILD_ID = guildId
 	bot.Run()
 }

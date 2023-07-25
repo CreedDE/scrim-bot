@@ -11,6 +11,7 @@ import (
 
 var (
 	BotToken string
+	GUILD_ID string
 )
 
 func Run() {
@@ -23,13 +24,6 @@ func Run() {
 
 	discord.AddHandler(handlePing)
 	discord.AddHandler(initCommands)
-
-	// TODO: need to figure out how to convert hex to decimal and make it mentionable
-	// newRole := *&discordgo.RoleParams{
-	// 	Name: "BotRole",
-	// }
-
-	// discord.GuildRoleCreate("some guild id", &newRole)
 
 	createCommands(discord)
 
