@@ -158,60 +158,55 @@ var (
 			// Access options in the order provided by the user.
 			options := i.ApplicationCommandData().Options
 
-			// Or convert the slice into a map
+			var selectedRole string
+
 			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
 			for _, opt := range options {
 				optionMap[opt.Name] = opt
 			}
 
-			// This example stores the provided arguments in an []interface{}
-			// which will be used to format the bot's response
-			margs := make([]interface{}, 0, len(options))
-			msgformat := "You learned how to use command options! " +
-				"Take a look at the value(s) you entered:\n"
+			users := make([]interface{}, 0, len(options))
+			msgformat := "You made changes to your team <@&%s>\nYou added the following persons: "
 
-			// Get the value from the option map.
-			// When the option exists, ok = true
-			if option, ok := optionMap["team-role"]; ok {
-				// Option values must be type asserted from interface{}.
-				// Discordgo provides utility functions to make this simple.
-				margs = append(margs, option.RoleValue(nil, "").ID)
-				msgformat += "> team-role: %s\n"
+			if opt, ok := optionMap["team-role"]; ok {
+				selectedRole = opt.RoleValue(nil, "").ID
+				users = append(users, opt.RoleValue(nil, "").ID)
 			}
 
 			if opt, ok := optionMap["player-1"]; ok {
-				margs = append(margs, opt.UserValue(nil).ID)
-				msgformat += "> player-1: %s\n"
+				users = append(users, opt.UserValue(nil).ID)
+				msgformat += "<@%s>"
 			}
 
 			if opt, ok := optionMap["player-2"]; ok {
-				margs = append(margs, opt.UserValue(nil).ID)
-				msgformat += "> player-2: %s\n"
+				users = append(users, opt.UserValue(nil).ID)
+				msgformat += ", <@%s>"
 			}
 
 			if opt, ok := optionMap["player-3"]; ok {
-				margs = append(margs, opt.UserValue(nil).ID)
-				msgformat += "> player-3: %s\n"
+				users = append(users, opt.UserValue(nil).ID)
+				msgformat += ", <@%s>"
 			}
 
 			if opt, ok := optionMap["player-4"]; ok {
-				margs = append(margs, opt.UserValue(nil).ID)
-				msgformat += "> player-4: %s\n"
+				users = append(users, opt.UserValue(nil).ID)
+				msgformat += ", <@%s>"
 			}
 
 			if opt, ok := optionMap["player-5"]; ok {
-				margs = append(margs, opt.UserValue(nil).ID)
-				msgformat += "> player-5: %s\n"
+				users = append(users, opt.UserValue(nil).ID)
+				msgformat += ", <@%s>"
+			}
+
+			for _, user := range users {
+				stringUser := fmt.Sprint(user)
+				s.GuildMemberRoleAdd(GUILD_ID, stringUser, selectedRole)
 			}
 
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				// Ignore type for now, they will be discussed in "responses"
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf(
-						msgformat,
-						margs...,
-					),
+					Content: fmt.Sprintf(msgformat, users...),
 				},
 			})
 		},
