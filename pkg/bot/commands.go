@@ -142,6 +142,10 @@ var (
 			// here adding the created Role to who fired the command /register-team
 			s.GuildMemberRoleAdd(GUILD_ID, i.Member.User.ID, createdRole.ID)
 
+			// adding the Team Manager role to the user who created the team
+			// TODO: this need to be changed as soon this bot will be used on the real discord
+			s.GuildMemberRoleAdd(GUILD_ID, i.Member.User.ID, "1133429330224099440")
+
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				// Ignore type for now, they will be discussed in "responses"
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
