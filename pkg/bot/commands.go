@@ -127,10 +127,13 @@ var (
 			}
 
 			var decimalColor int = int(color)
+			var mentionable = true
 
 			newRole := *&discordgo.RoleParams{
-				Name:  teamName,
-				Color: &decimalColor,
+				Name:        teamName,
+				Color:       &decimalColor,
+				Mentionable: &mentionable,
+				Hoist:       &mentionable,
 			}
 
 			createdRole, err := s.GuildRoleCreate(GUILD_ID, &newRole)
