@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/bwmarrin/discordgo"
+	"golang.org/x/exp/slices"
 )
 
 var (
@@ -195,6 +196,10 @@ var (
 			// Access options in the order provided by the user.
 			options := i.ApplicationCommandData().Options
 
+			// this is an array of roles that are forbidden to mention if u are using the add-players command. Because only roles that got created by players should be able to editable
+			// TODO: change this array as soon this bot get lives on the discord
+			forbiddenRoles := []string{"1133892123805089926", "1132776794072825932", "1133891787891671050", "1133429330224099440", "1133891572551929866", "1133891523365310485", "1133890965871005756", "1133892429360140389", "1133896247644803164"}
+
 			var selectedRole string
 
 			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
@@ -235,51 +240,61 @@ var (
 				msgformat += ", <@%s>"
 			}
 
-			for _, user := range users {
-				stringUser := fmt.Sprint(user)
-				s.GuildMemberRoleAdd(GUILD_ID, stringUser, selectedRole)
+			if slices.Contains(forbiddenRoles, selectedRole) {
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "U cant give them forbidden roles! Try again.",
+					},
+				})
+
+			} else {
+				for _, user := range users {
+					stringUser := fmt.Sprint(user)
+					s.GuildMemberRoleAdd(GUILD_ID, stringUser, selectedRole)
+				}
+
+				channel, err := s.UserChannelCreate(i.Member.User.ID)
+				if err != nil {
+					// If an error occurred, we failed to create the channel.
+					//
+					// Some common causes are:
+					// 1. We don't share a server with the user (not possible here).
+					// 2. We opened enough DM channels quickly enough for Discord to
+					//    label us as abusing the endpoint, blocking us from opening
+					//    new ones.
+					fmt.Println("error creating channel:", err)
+					s.ChannelMessageSend(
+						i.ChannelID,
+						"Something went wrong while sending the DM!",
+					)
+					return
+				}
+
+				var finalMsg = fmt.Sprintf(msgformat, users...)
+
+				_, err = s.ChannelMessageSend(channel.ID, finalMsg)
+				if err != nil {
+					// If an error occurred, we failed to send the message.
+					//
+					// It may occur either when we do not share a server with the
+					// user (highly unlikely as we just received a message) or
+					// the user disabled DM in their settings (more likely).
+					fmt.Println("error sending DM message:", err)
+					s.ChannelMessageSend(
+						i.ChannelID,
+						"Failed to send you a DM. "+
+							"Did you disable DM in your privacy settings?",
+					)
+				}
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "You got a DM from the Bot!",
+					},
+				})
 			}
-
-			channel, err := s.UserChannelCreate(i.Member.User.ID)
-			if err != nil {
-				// If an error occurred, we failed to create the channel.
-				//
-				// Some common causes are:
-				// 1. We don't share a server with the user (not possible here).
-				// 2. We opened enough DM channels quickly enough for Discord to
-				//    label us as abusing the endpoint, blocking us from opening
-				//    new ones.
-				fmt.Println("error creating channel:", err)
-				s.ChannelMessageSend(
-					i.ChannelID,
-					"Something went wrong while sending the DM!",
-				)
-				return
-			}
-
-			var finalMsg = fmt.Sprintf(msgformat, users...)
-
-			_, err = s.ChannelMessageSend(channel.ID, finalMsg)
-			if err != nil {
-				// If an error occurred, we failed to send the message.
-				//
-				// It may occur either when we do not share a server with the
-				// user (highly unlikely as we just received a message) or
-				// the user disabled DM in their settings (more likely).
-				fmt.Println("error sending DM message:", err)
-				s.ChannelMessageSend(
-					i.ChannelID,
-					"Failed to send you a DM. "+
-						"Did you disable DM in your privacy settings?",
-				)
-			}
-
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "You got a DM from the Bot!",
-				},
-			})
 		},
 	}
 
