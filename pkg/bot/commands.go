@@ -149,11 +149,45 @@ var (
 			// TODO: this need to be changed as soon this bot will be used on the real discord
 			s.GuildMemberRoleAdd(GUILD_ID, i.Member.User.ID, "1133429330224099440")
 
+			channel, err := s.UserChannelCreate(i.Member.User.ID)
+			if err != nil {
+				// If an error occurred, we failed to create the channel.
+				//
+				// Some common causes are:
+				// 1. We don't share a server with the user (not possible here).
+				// 2. We opened enough DM channels quickly enough for Discord to
+				//    label us as abusing the endpoint, blocking us from opening
+				//    new ones.
+				fmt.Println("error creating channel:", err)
+				s.ChannelMessageSend(
+					i.ChannelID,
+					"Something went wrong while sending the DM!",
+				)
+				return
+			}
+
+			var finalMsg = "Congratz we created your Team named " + teamName + " :tada:"
+
+			_, err = s.ChannelMessageSend(channel.ID, finalMsg)
+			if err != nil {
+				// If an error occurred, we failed to send the message.
+				//
+				// It may occur either when we do not share a server with the
+				// user (highly unlikely as we just received a message) or
+				// the user disabled DM in their settings (more likely).
+				fmt.Println("error sending DM message:", err)
+				s.ChannelMessageSend(
+					i.ChannelID,
+					"Failed to send you a DM. "+
+						"Did you disable DM in your privacy settings?",
+				)
+			}
+
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				// Ignore type for now, they will be discussed in "responses"
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Congratz we created your Team named " + teamName + " :tada:",
+					Content: "You got a DM from the Bot!",
 				},
 			})
 		},
@@ -169,7 +203,7 @@ var (
 			}
 
 			users := make([]interface{}, 0, len(options))
-			msgformat := "You made changes to your team <@&%s>\nYou added the following persons: "
+			msgformat := "You made changes to your team %s\nYou added the following persons: "
 
 			if opt, ok := optionMap["team-role"]; ok {
 				selectedRole = opt.RoleValue(nil, "").ID
@@ -206,10 +240,44 @@ var (
 				s.GuildMemberRoleAdd(GUILD_ID, stringUser, selectedRole)
 			}
 
+			channel, err := s.UserChannelCreate(i.Member.User.ID)
+			if err != nil {
+				// If an error occurred, we failed to create the channel.
+				//
+				// Some common causes are:
+				// 1. We don't share a server with the user (not possible here).
+				// 2. We opened enough DM channels quickly enough for Discord to
+				//    label us as abusing the endpoint, blocking us from opening
+				//    new ones.
+				fmt.Println("error creating channel:", err)
+				s.ChannelMessageSend(
+					i.ChannelID,
+					"Something went wrong while sending the DM!",
+				)
+				return
+			}
+
+			var finalMsg = fmt.Sprintf(msgformat, users...)
+
+			_, err = s.ChannelMessageSend(channel.ID, finalMsg)
+			if err != nil {
+				// If an error occurred, we failed to send the message.
+				//
+				// It may occur either when we do not share a server with the
+				// user (highly unlikely as we just received a message) or
+				// the user disabled DM in their settings (more likely).
+				fmt.Println("error sending DM message:", err)
+				s.ChannelMessageSend(
+					i.ChannelID,
+					"Failed to send you a DM. "+
+						"Did you disable DM in your privacy settings?",
+				)
+			}
+
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf(msgformat, users...),
+					Content: "You got a DM from the Bot!",
 				},
 			})
 		},
