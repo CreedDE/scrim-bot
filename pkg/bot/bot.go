@@ -24,6 +24,7 @@ func Run() {
 
 	discord.AddHandler(handlePing)
 	discord.AddHandler(initCommands)
+	discord.AddHandler(createEmbed)
 
 	createCommands(discord)
 
