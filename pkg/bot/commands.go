@@ -32,12 +32,12 @@ var (
 					Description: "HEX Color Code for the role. Example: 123456",
 					Required:    true,
 				},
-				{
-					Type:        discordgo.ApplicationCommandOptionInteger,
-					Name:        "premier-division",
-					Description: "Type in the Division your team get placed in the Premier Mode (only numbers allowed)",
-					Required:    false,
-				},
+				// {
+				// 	Type:        discordgo.ApplicationCommandOptionInteger,
+				// 	Name:        "premier-division",
+				// 	Description: "Type in the Division your team get placed in the Premier Mode (only numbers allowed)",
+				// 	Required:    false,
+				// },
 			},
 		},
 		{
