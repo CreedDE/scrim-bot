@@ -2,9 +2,11 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"scrim-go-bot/pkg/bot"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
@@ -28,6 +30,7 @@ func getEnv(key string) (string, bool) {
 }
 
 func main() {
+	r := mux.NewRouter()
 	botToken, ok := getEnv("BOT_TOKEN")
 
 	if !ok {
@@ -43,4 +46,6 @@ func main() {
 	bot.BotToken = botToken
 	bot.GUILD_ID = guildId
 	bot.Run()
+
+	http.ListenAndServe(":8080", r)
 }
