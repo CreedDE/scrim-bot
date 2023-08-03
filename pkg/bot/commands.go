@@ -196,10 +196,6 @@ var (
 			// Access options in the order provided by the user.
 			options := i.ApplicationCommandData().Options
 
-			// this is an array of roles that are forbidden to mention if u are using the add-players command. Because only roles that got created by players should be able to editable
-			// TODO: change this array as soon this bot get lives on the discord
-			forbiddenRoles := []string{"1133892123805089926", "1132776794072825932", "1133891787891671050", "1133429330224099440", "1133891572551929866", "1133891523365310485", "1133890965871005756", "1133892429360140389", "1133896247644803164"}
-
 			var selectedRole string
 
 			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
@@ -240,7 +236,7 @@ var (
 				msgformat += ", <@%s>"
 			}
 
-			if slices.Contains(forbiddenRoles, selectedRole) {
+			if slices.Contains(Forbidden_Roles, selectedRole) {
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{

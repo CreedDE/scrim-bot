@@ -28,19 +28,12 @@ func getEnv(key string) (string, bool) {
 }
 
 func main() {
-	botToken, ok := getEnv("BOT_TOKEN")
+	// loading all variables from the config.toml file
+	config := bot.LoadConfig()
 
-	if !ok {
-		log.Fatal("Must set Discord token as env variable: BOT_TOKEN")
-	}
-
-	guildId, ok := getEnv("DISCORD_GUILD_ID")
-
-	if !ok {
-		log.Fatal("Must set Guild ID as env variable: DISCORD_GUILD_ID")
-	}
-
-	bot.BotToken = botToken
-	bot.GUILD_ID = guildId
+	// assign config variables
+	bot.BotToken = config.Bot_Token
+	bot.GUILD_ID = config.Guild_ID
+	bot.Forbidden_Roles = config.Forbidden_Roles
 	bot.Run()
 }

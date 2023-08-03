@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	BotToken string
-	GUILD_ID string
+	BotToken        string
+	GUILD_ID        string
+	Forbidden_Roles []string
 )
 
 func Run() {
@@ -46,7 +47,7 @@ func Run() {
 	}
 }
 
-// this function sends an Pong back to if a user types ping
+// this function sends an Pong back to if a user types scping
 func handlePing(discord *discordgo.Session, message *discordgo.MessageCreate) {
 	if message.Author.ID == discord.State.User.ID {
 		return
